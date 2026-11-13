@@ -100,14 +100,32 @@ def update_env_refresh_token(new_refresh_token: str, env_path: Path = ENV_FILE_P
 
 def get_kakao_access_token(env_path: Path = ENV_FILE_PATH) -> str:
     """
-    .env 파일의 KAKAO_REST_API_KEY, KAKAO_CLIENT_SECRET, KAKAO_REFRESH_TOKEN을 사용해
+    .env 파일 또는 환경변수(GitHub Actions Secrets 등)의
+    KAKAO_REST_API_KEY, KAKAO_CLIENT_SECRET, KAKAO_REFRESH_TOKEN을 사용해
     카카오 OAuth 서버에서 액세스 토큰(access_token)을 발급받습니다.
     """
-    env_vars = load_env_file(env_path)
+    env_vars: Dict[str, str] = {}
+    if env_path.is_file():
+        env_vars = load_env_file(env_path)
 
-    rest_api_key = env_vars.get("KAKAO_REST_API_KEY") or env_vars.get("REST_API_KEY")
-    client_secret = env_vars.get("KAKAO_CLIENT_SECRET") or env_vars.get("CLIENT_SECRET")
-    refresh_token = env_vars.get("KAKAO_REFRESH_TOKEN") or env_vars.get("REFRESH_TOKEN")
+    rest_api_key = (
+        env_vars.get("KAKAO_REST_API_KEY")
+        or env_vars.get("REST_API_KEY")
+        or os.environ.get("KAKAO_REST_API_KEY")
+        or os.environ.get("REST_API_KEY")
+    )
+    client_secret = (
+        env_vars.get("KAKAO_CLIENT_SECRET")
+        or env_vars.get("CLIENT_SECRET")
+        or os.environ.get("KAKAO_CLIENT_SECRET")
+        or os.environ.get("CLIENT_SECRET")
+    )
+    refresh_token = (
+        env_vars.get("KAKAO_REFRESH_TOKEN")
+        or env_vars.get("REFRESH_TOKEN")
+        or os.environ.get("KAKAO_REFRESH_TOKEN")
+        or os.environ.get("REFRESH_TOKEN")
+    )
 
     missing = []
     if not rest_api_key:
